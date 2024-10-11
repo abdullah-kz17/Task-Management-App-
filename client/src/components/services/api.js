@@ -31,6 +31,7 @@ export const register = (username, email, password) =>
   api
     .post("/auth/register", { username, email, password })
     .then((res) => res.data);
+
 export const logout = () => {
   localStorage.removeItem("user");
   api.defaults.headers.common["Authorization"] = "";

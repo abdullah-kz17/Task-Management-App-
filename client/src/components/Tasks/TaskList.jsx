@@ -1,34 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { List, Card, Tag, Space, Button, message } from "antd";
+import React, { useState } from "react";
+import { List, Card, Tag, Button, message } from "antd";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { getTasks, deleteTask } from "../services/api";
+import { deleteTask } from "../services/api";
 import TaskForm from "./TaskForm";
 
-const TaskList = () => {
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(false);
+const TaskList = ({ tasks, onTasksChange }) => {
   const [editingTask, setEditingTask] = useState(null);
-
-  useEffect(() => {
-    fetchTasks();
-  }, []);
-
-  const fetchTasks = async () => {
-    setLoading(true);
-    try {
-      const data = await getTasks();
-      setTasks(data);
-    } catch (error) {
-      message.error("Failed to fetch tasks");
-    }
-    setLoading(false);
-  };
 
   const handleDelete = async (id) => {
     try {
       await deleteTask(id);
       message.success("Task deleted successfully");
-      fetchTasks();
+      onTasksChange();
     } catch (error) {
       message.error("Failed to delete task");
     }
@@ -40,13 +23,12 @@ const TaskList = () => {
 
   const handleUpdateSuccess = () => {
     setEditingTask(null);
-    fetchTasks();
+    onTasksChange();
   };
 
   return (
     <Card title="Tasks">
       <List
-        loading={loading}
         itemLayout="horizontal"
         dataSource={tasks}
         renderItem={(task) => (

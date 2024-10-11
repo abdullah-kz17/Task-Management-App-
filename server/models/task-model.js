@@ -2,11 +2,11 @@ const mongoose = require("mongoose");
 
 const taskSchema = new mongoose.Schema(
   {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: "User",
-    },
+    // user: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   required: true,
+    //   ref: "User",
+    // },
     title: { type: String, required: true },
     description: { type: String, required: false },
     status: { type: Boolean, default: false },
@@ -14,7 +14,11 @@ const taskSchema = new mongoose.Schema(
       type: Date,
       required: false,
     },
-    // userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
   {
     timestamps: true,
