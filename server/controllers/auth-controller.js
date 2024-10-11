@@ -57,4 +57,18 @@ const Login = async (req, res) => {
   }
 };
 
-module.exports = { Register, Login };
+// get current user data
+
+const getCurrentUser = async (req, res) => {
+  try {
+    const userData = req.user;
+    if (!userData) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(400).json({ message: "Error fetching user data", error });
+  }
+};
+
+module.exports = { Register, Login, getCurrentUser };

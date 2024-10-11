@@ -1,52 +1,26 @@
-import React, { useState, useEffect } from "react";
-import { Row, Col, Spin } from "antd";
-import TaskList from "./Tasks/TaskList";
-import TaskForm from "./Tasks/TaskForm";
-import { getTasks } from "./services/api";
+// src/pages/Dashboard.jsx
+import { useState } from "react";
+import TaskList from "../components/Tasks/TaskList";
+import TaskForm from "../components/Tasks/TaskForm";
+import AppLayout from "../components/Layouts/AppLayout";
 
 const Dashboard = () => {
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [editingTask, setEditingTask] = useState(null);
 
-  useEffect(() => {
-    fetchTasks();
-  }, []);
-
-  const fetchTasks = async () => {
-    try {
-      const data = await getTasks();
-      setTasks(data);
-    } catch (error) {
-      console.error("Failed to fetch tasks:", error);
-    } finally {
-      setLoading(false);
-    }
+  const handleEditTask = (task) => {
+    setEditingTask(task);
   };
 
-  if (loading) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-        }}
-      >
-        <Spin size="large" />
-      </div>
-    );
-  }
+  const handleSuccess = () => {
+    setEditingTask(null); // Reset editing task after success
+  };
 
   return (
-    <Row gutter={24}>
-      <Col span={16}>
-        <TaskList tasks={tasks} onTasksChange={fetchTasks} />
-      </Col>
-      <Col span={8}>
-        <TaskForm onSuccess={fetchTasks} />
-      </Col>
-    </Row>
+    <AppLayout>
+      <h1>Task Management Dashboard</h1>
+      <TaskForm taskToEdit={editingTask} onSuccess={handleSuccess} />
+      <TaskList onEdit={handleEditTask} />
+    </AppLayout>
   );
 };
 

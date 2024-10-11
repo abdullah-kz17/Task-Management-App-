@@ -1,74 +1,50 @@
-import React, { useState } from "react";
-import { List, Card, Tag, Button, message } from "antd";
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { deleteTask } from "../services/api";
-import TaskForm from "./TaskForm";
+// src/components/TaskList.jsx
+import { Table, Button, Popconfirm } from "antd";
+import { useEffect, useState } from "react";
+import { getTasks, deleteTask } from "../services/api";
 
-const TaskList = ({ tasks, onTasksChange }) => {
-  const [editingTask, setEditingTask] = useState(null);
+const TaskList = ({ onEdit }) => {
+  const [tasks, setTasks] = useState([]);
+
+  const fetchTasks = async () => {
+    const data = await getTasks();
+    setTasks(data);
+  };
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
 
   const handleDelete = async (id) => {
-    try {
-      await deleteTask(id);
-      message.success("Task deleted successfully");
-      onTasksChange();
-    } catch (error) {
-      message.error("Failed to delete task");
-    }
+    await deleteTask(id);
+    fetchTasks(); // Refresh tasks after deletion
   };
 
-  const handleEdit = (task) => {
-    setEditingTask(task);
-  };
-
-  const handleUpdateSuccess = () => {
-    setEditingTask(null);
-    onTasksChange();
-  };
-
-  return (
-    <Card title="Tasks">
-      <List
-        itemLayout="horizontal"
-        dataSource={tasks}
-        renderItem={(task) => (
-          <List.Item
-            actions={[
-              <Button
-                icon={<EditOutlined />}
-                onClick={() => handleEdit(task)}
-              />,
-              <Button
-                icon={<DeleteOutlined />}
-                onClick={() => handleDelete(task._id)}
-                danger
-              />,
-            ]}
+  const columns = [
+    { title: "Title", dataIndex: "title", key: "title" },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (status) => (status ? "Completed" : "Pending"),
+    },
+    {
+      title: "Actions",
+      render: (task) => (
+        <>
+          <Button onClick={() => onEdit(task)}>Edit</Button>
+          <Popconfirm
+            title="Are you sure?"
+            onConfirm={() => handleDelete(task._id)}
           >
-            <List.Item.Meta title={task.title} description={task.description} />
-            <Tag
-              color={
-                task.status === "To Do"
-                  ? "red"
-                  : task.status === "In Progress"
-                  ? "blue"
-                  : "green"
-              }
-            >
-              {task.status}
-            </Tag>
-          </List.Item>
-        )}
-      />
-      {editingTask && (
-        <TaskForm
-          task={editingTask}
-          onSuccess={handleUpdateSuccess}
-          onCancel={() => setEditingTask(null)}
-        />
-      )}
-    </Card>
-  );
+            <Button danger>Delete</Button>
+          </Popconfirm>
+        </>
+      ),
+    },
+  ];
+
+  return <Table dataSource={tasks} columns={columns} rowKey="_id" />;
 };
 
 export default TaskList;

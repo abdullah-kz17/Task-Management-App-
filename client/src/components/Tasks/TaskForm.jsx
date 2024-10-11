@@ -1,76 +1,44 @@
-import React, { useState } from "react";
-import { Form, Input, Button, Select, message } from "antd";
+// src/components/TaskForm.jsx
+import { Form, Input, Button, Switch } from "antd";
+import { useState, useEffect } from "react";
 import { createTask, updateTask } from "../services/api";
 
-const { Option } = Select;
-
-const TaskForm = ({ task, onSuccess, onCancel }) => {
+const TaskForm = ({ taskToEdit, onSuccess }) => {
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
 
-  const onFinish = async (values) => {
-    setLoading(true);
-    try {
-      if (task) {
-        await updateTask(task._id, values);
-        message.success("Task updated successfully");
-      } else {
-        await createTask(values);
-        message.success("Task created successfully");
-      }
-      form.resetFields();
-      if (onSuccess) onSuccess();
-    } catch (error) {
-      message.error("Failed to save task");
+  useEffect(() => {
+    if (taskToEdit) {
+      form.setFieldsValue(taskToEdit);
     }
-    setLoading(false);
+  }, [taskToEdit, form]);
+
+  const handleSubmit = async (values) => {
+    if (taskToEdit) {
+      await updateTask(taskToEdit._id, values);
+    } else {
+      await createTask(values);
+    }
+    onSuccess();
+    form.resetFields(); // Clear the form after success
   };
 
   return (
-    <Form
-      form={form}
-      name="task"
-      onFinish={onFinish}
-      initialValues={task || {}}
-      layout="vertical"
-    >
-      <Form.Item
-        name="title"
-        label="Title"
-        rules={[{ required: true, message: "Please input the task title!" }]}
-      >
-        <Input />
+    <Form form={form} onFinish={handleSubmit} layout="vertical">
+      <Form.Item name="title" label="Title" rules={[{ required: true }]}>
+        <Input placeholder="Task Title" />
       </Form.Item>
-      <Form.Item
-        name="description"
-        label="Description"
-        rules={[
-          { required: true, message: "Please input the task description!" },
-        ]}
-      >
-        <Input.TextArea />
+
+      <Form.Item name="description" label="Description">
+        <Input.TextArea placeholder="Task Description" />
       </Form.Item>
-      <Form.Item
-        name="status"
-        label="Status"
-        rules={[{ required: true, message: "Please select the task status!" }]}
-      >
-        <Select>
-          <Option value="To Do">To Do</Option>
-          <Option value="In Progress">In Progress</Option>
-          <Option value="Done">Done</Option>
-        </Select>
+
+      <Form.Item name="status" label="Completed" valuePropName="checked">
+        <Switch />
       </Form.Item>
-      <Form.Item>
-        <Button type="primary" htmlType="submit" loading={loading}>
-          {task ? "Update Task" : "Create Task"}
-        </Button>
-        {task && (
-          <Button onClick={onCancel} style={{ marginLeft: 8 }}>
-            Cancel
-          </Button>
-        )}
-      </Form.Item>
+
+      <Button type="primary" htmlType="submit">
+        {taskToEdit ? "Update Task" : "Create Task"}
+      </Button>
     </Form>
   );
 };
