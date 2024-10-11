@@ -2,7 +2,7 @@ const Task = require("../models/task-model");
 
 // Create a new task
 const createTask = async (req, res) => {
-  const { title, description, dueDate } = req.body;
+  const { title, description, status } = req.body;
   const userId = req.user._id; // Get the authenticated user's ID
 
   try {
@@ -10,7 +10,7 @@ const createTask = async (req, res) => {
       title,
       description,
       completed: false,
-      dueDate,
+      status,
       userId, // Associate task with the user
     });
     res.status(201).json(newTask);
@@ -50,13 +50,13 @@ const getTaskById = async (req, res) => {
 // Update a task
 const updateTask = async (req, res) => {
   const { id } = req.params;
-  const { title, description, completed, dueDate } = req.body;
+  const { title, description, completed, status } = req.body;
   const userId = req.user._id; // Get the authenticated user's ID
 
   try {
     const task = await Task.findOneAndUpdate(
       { _id: id, userId }, // Ensure the task belongs to the user
-      { title, description, completed, dueDate },
+      { title, description, completed, status },
       { new: true, runValidators: true }
     );
     if (!task) {
